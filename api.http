@@ -1,0 +1,29 @@
+### Register
+POST http://localhost:8080/register
+Content-Type: application/json
+
+{
+  "email": "test@gmail.com",
+  "password": "123456"
+}
+
+### Verify Account
+GET http://localhost:8080/verify?token=xxxxx.....
+
+
+### Login
+POST http://localhost:8080/login
+Content-Type: application/json
+
+{
+  "email": "test@gmail.com",
+  "password": "123456"
+}
+
+### Refresh Access Token
+POST http://localhost:8080/refresh
+Content-Type: application/json
+
+{
+  "refresh_token": "your_refresh_token_here"
+}
