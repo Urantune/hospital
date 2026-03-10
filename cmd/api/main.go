@@ -18,12 +18,14 @@ func main() {
 	r.GET("/verify", handler.Verify)
 	r.POST("/login", handler.Login)
 	r.POST("/refresh", handler.Refresh)
+
 	auth := r.Group("/")
 	auth.Use(middleware.AuthMiddleware())
 	{
-		r.POST("/logout", handler.Logout)
+		auth.POST("/logout", handler.Logout)
+		auth.GET("/roles", handler.GetRoles)
+		auth.POST("/roles/assign", handler.AssignRole)
 	}
 
 	r.Run(":8080")
-
 }

@@ -129,3 +129,6 @@ func RefreshToken(oldRefreshToken string) (string, string, error) {
 
 	return newAccessToken, newRefreshToken, nil
 }
+func Logout(refreshToken string) error {
+	return repository.RevokeRefreshToken(refreshToken)
+}

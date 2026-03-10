@@ -128,3 +128,19 @@ func RevokeAllUserTokens(userID string) error {
 	_, err := config.DB.Exec(query, userID)
 	return err
 }
+func GetSystemRoles() ([]models.Role, error) {
+	var roles []models.Role
+	query := `SELECT id, name, description FROM roles`
+	err := config.DB.Select(&roles, query)
+	return roles, err
+}
+
+func AssignUserRole(userID string, roleID int) error {
+	query := `
+	UPDATE users 
+	SET role_id = $1, updated_at = NOW() 
+	WHERE id = $2
+	`
+	_, err := config.DB.Exec(query, roleID, userID)
+	return err
+}
