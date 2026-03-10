@@ -11,7 +11,7 @@ var DB *sqlx.DB
 
 func ConnectDB() {
 
-	dsn := "host=localhost port=5432 user=postgres password=dhminh12 dbname=hospital sslmode=disable"
+	dsn := "host=localhost port=5432 user=postgres password=123456 dbname=Hospital sslmode=disable"
 
 	db, err := sqlx.Connect("postgres", dsn)
 	if err != nil {
