@@ -37,7 +37,7 @@ func Register(email, password string) (*models.User, error) {
 			Valid:  true,
 		},
 		IsVerified: false,
-		Status:     "pending",
+		Status:     "inactive",
 	}
 
 	err = repository.CreateUser(user)

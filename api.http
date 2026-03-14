@@ -1,18 +1,25 @@
+################################
+### AUTH
+################################
+
 ### Register
-POST http://localhost:8080/register
+POST http://localhost:8080/auth/register
 Content-Type: application/json
 
 {
   "email": "test@gmail.com",
   "password": "123456"
 }
+
+###
 
 ### Verify Account
-GET http://localhost:8080/verify?token=xxxxx.....
+GET http://localhost:8080/auth/verify?token=YOUR_VERIFY_TOKEN
 
+###
 
 ### Login
-POST http://localhost:8080/login
+POST http://localhost:8080/auth/login
 Content-Type: application/json
 
 {
@@ -20,10 +27,112 @@ Content-Type: application/json
   "password": "123456"
 }
 
+###
+
 ### Refresh Access Token
-POST http://localhost:8080/refresh
+POST http://localhost:8080/auth/refresh
 Content-Type: application/json
 
 {
-  "refresh_token": "your_refresh_token_here"
+  "refresh_token": "YOUR_REFRESH_TOKEN"
 }
+
+################################
+### CLINIC
+################################
+
+### Create Clinic
+POST http://localhost:8080/api/clinics
+Authorization: Bearer "YOUR_ACCESS_TOKEN"
+Content-Type: application/json
+
+{
+  "name": "City Hospital",
+  "address": "123 Nguyen Trai",
+  "phone": "0909000000",
+  "status": "active"
+}
+
+################################
+### DOCTOR
+################################
+
+### Create Doctor
+POST http://localhost:8080/api/doctors
+Authorization: Bearer "YOUR_ACCESS_TOKEN"
+Content-Type: application/json
+
+{
+  "user_id": "USER_UUID",
+  "clinic_id": "CLINIC_UUID",
+  "specialization": "Cardiology"
+}
+
+###
+
+### Deactivate Doctor
+PUT http://localhost:8080/api/doctors/DOCTOR_UUID/deactivate
+Authorization: Bearer "YOUR_ACCESS_TOKEN"
+
+###
+
+### Activate Doctor
+PUT http://localhost:8080/api/doctors/DOCTOR_UUID/activate
+Authorization: Bearer "YOUR_ACCESS_TOKEN"
+
+################################
+### MEDICAL SERVICE
+################################
+
+### Create Service
+POST http://localhost:8080/api/services
+Authorization: Bearer "YOUR_ACCESS_TOKEN"
+Content-Type: application/json
+
+{
+  "name": "Heart Check",
+  "description": "Heart examination",
+  "default_duration_minutes": 30
+}
+
+###
+
+### Get Services
+GET http://localhost:8080/api/services
+Authorization: Bearer "YOUR_ACCESS_TOKEN"
+
+################################
+### DOCTOR SERVICE MAPPING
+################################
+
+### Assign Service To Doctor
+POST http://localhost:8080/api/doctor-services
+Authorization: Bearer "YOUR_ACCESS_TOKEN"
+Content-Type: application/json
+
+{
+  "doctor_id": "DOCTOR_UUID",
+  "service_id": "SERVICE_UUID",
+  "clinic_id": "CLINIC_UUID"
+}
+
+################################
+### USER
+################################
+
+### Logout
+POST http://localhost:8080/api/logout
+Authorization: Bearer "YOUR_ACCESS_TOKEN"
+
+
+Register
+   ↓
+Login
+   ↓
+Create Clinic
+   ↓
+Create Doctor
+   ↓
+Create Service
+   ↓
+Assign Service to Doctor

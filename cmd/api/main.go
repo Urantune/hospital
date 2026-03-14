@@ -14,19 +14,38 @@ func main() {
 
 	r := gin.Default()
 
-	r.POST("/register", handler.Register)
-	r.GET("/verify", handler.Verify)
-	r.POST("/login", handler.Login)
-	r.POST("/refresh", handler.Refresh)
-
-	auth := r.Group("/")
-	auth.Use(middleware.AuthMiddleware())
+	// AUTH
+	authRoutes := r.Group("/auth")
 	{
-		auth.POST("/logout", handler.Logout)
-		auth.GET("/roles", handler.GetRoles)
-		auth.POST("/roles/assign", handler.AssignRole)
+		authRoutes.POST("/register", handler.Register)
+		authRoutes.GET("/verify", handler.Verify)
+		authRoutes.POST("/login", handler.Login)
+		authRoutes.POST("/refresh", handler.Refresh)
+	}
+
+	// PROTECTED ROUTES
+	api := r.Group("/api")
+	api.Use(middleware.AuthMiddleware())
+	{
+
+		// USER
+		api.POST("/logout", handler.Logout)
+		api.GET("/roles", handler.GetRoles)
+		api.POST("/roles/assign", handler.AssignRole)
+
+		// DOCTOR
+		api.POST("/doctors", handler.CreateDoctor)
+		api.PUT("/doctors/:id/activate", handler.ActivateDoctor)
+		api.PUT("/doctors/:id/deactivate", handler.DeactivateDoctor)
+
+		// SERVICES
+		api.POST("/clinics", handler.CreateClinic)
+		api.POST("/services", handler.CreateService)
+		api.GET("/services", handler.GetServices)
+
+		// DOCTOR SERVICE
+		api.POST("/doctor-services", handler.AssignServiceToDoctor)
 	}
 
 	r.Run(":8080")
-
 }

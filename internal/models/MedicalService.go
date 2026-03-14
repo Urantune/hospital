@@ -1,0 +1,9 @@
+package models
+
+type MedicalService struct {
+	ID                     string `db:"id" json:"id"`
+	Name                   string `db:"name" json:"name"`
+	Description            string `db:"description" json:"description"`
+	DefaultDurationMinutes int    `db:"default_duration_minutes" json:"duration"`
+	Status                 string `db:"status" json:"status"`
+}
