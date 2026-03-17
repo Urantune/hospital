@@ -1,0 +1,44 @@
+ALTER TABLE users
+ADD
+    full_name NVARCHAR(255) NULL,
+    address NVARCHAR(500) NULL,
+    date_of_birth DATE NULL,
+    role NVARCHAR(50) NOT NULL CONSTRAINT DF_users_role DEFAULT 'patient',
+    clinic_id UNIQUEIDENTIFIER NULL;
+
+CREATE TABLE clinics (
+    id UNIQUEIDENTIFIER PRIMARY KEY,
+    code NVARCHAR(100) NOT NULL UNIQUE,
+    name NVARCHAR(255) NOT NULL,
+    owner_user_id UNIQUEIDENTIFIER NULL,
+    status NVARCHAR(50) NOT NULL,
+    effective_from DATE NULL,
+    effective_to DATE NULL,
+    created_at DATETIME NOT NULL DEFAULT GETDATE(),
+    updated_at DATETIME NOT NULL DEFAULT GETDATE()
+);
+
+CREATE TABLE audit_logs (
+    id UNIQUEIDENTIFIER PRIMARY KEY,
+    user_id UNIQUEIDENTIFIER NOT NULL,
+    clinic_id UNIQUEIDENTIFIER NULL,
+    action NVARCHAR(150) NOT NULL,
+    resource NVARCHAR(150) NOT NULL,
+    resource_id NVARCHAR(150) NOT NULL,
+    description NVARCHAR(1000) NOT NULL,
+    ip_address NVARCHAR(64) NULL,
+    created_at DATETIME NOT NULL DEFAULT GETDATE()
+);
+
+CREATE TABLE medical_configurations (
+    id UNIQUEIDENTIFIER PRIMARY KEY,
+    category NVARCHAR(100) NOT NULL,
+    config_key NVARCHAR(150) NOT NULL,
+    config_val NVARCHAR(MAX) NOT NULL,
+    status NVARCHAR(50) NOT NULL,
+    clinic_id UNIQUEIDENTIFIER NULL,
+    created_by UNIQUEIDENTIFIER NOT NULL,
+    updated_by UNIQUEIDENTIFIER NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT GETDATE(),
+    updated_at DATETIME NOT NULL DEFAULT GETDATE()
+);

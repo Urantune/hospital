@@ -51,6 +51,49 @@ func GetUserByEmail(email string) (*models.User, error) {
 	return &user, nil
 }
 
+func GetUserByID(userID string) (*models.User, error) {
+	var user models.User
+
+	query := `
+	SELECT id, email, full_name, phone, address, date_of_birth, password_hash, is_verified, status, role, clinic_id, verification_token, role_id, created_at, updated_at
+	FROM users
+	WHERE id = $1
+	`
+
+	err := config.DB.Get(&user, query, userID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, sql.ErrNoRows
+		}
+		return nil, err
+	}
+
+	return &user, nil
+}
+
+func UpdateUserProfile(user *models.User) error {
+	query := `
+	UPDATE users
+	SET full_name = $2,
+	    phone = $3,
+	    address = $4,
+	    date_of_birth = $5,
+	    updated_at = NOW()
+	WHERE id = $1
+	`
+
+	_, err := config.DB.Exec(
+		query,
+		user.ID,
+		user.FullName,
+		user.Phone,
+		user.Address,
+		user.DateOfBirth,
+	)
+
+	return err
+}
+
 func VerifyUser(token string) error {
 
 	query := `
