@@ -117,6 +117,52 @@ Content-Type: application/json
 }
 
 ################################
+### CMS SYNC
+################################
+
+### Sync Clinic From CMS
+POST http://localhost:8080/api/cms/sync
+Authorization: Bearer "YOUR_ACCESS_TOKEN"
+X-CMS-Signature: YOUR_SIGNATURE
+Content-Type: application/json
+
+{
+  "event_id": "evt-clinic-001",
+  "source": "directus",
+  "entity_type": "clinic",
+  "entity_id": "CLINIC_UUID",
+  "action": "updated",
+  "payload": {
+    "id": "CLINIC_UUID",
+    "name": "City Hospital Updated",
+    "address": "123 Nguyen Trai",
+    "phone": "0909000000",
+    "status": "active"
+  }
+}
+
+### Sync Medical Service From CMS
+POST http://localhost:8080/api/cms/sync
+Authorization: Bearer "YOUR_ACCESS_TOKEN"
+X-CMS-Signature: YOUR_SIGNATURE
+Content-Type: application/json
+
+{
+  "event_id": "evt-service-001",
+  "source": "directus",
+  "entity_type": "medical_service",
+  "entity_id": "SERVICE_UUID",
+  "action": "created",
+  "payload": {
+    "id": "SERVICE_UUID",
+    "name": "Heart Check Plus",
+    "description": "Heart examination",
+    "default_duration_minutes": 45,
+    "status": "active"
+  }
+}
+
+################################
 ### USER
 ################################
 

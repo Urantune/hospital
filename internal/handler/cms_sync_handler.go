@@ -31,13 +31,15 @@ func SyncCMSChange(c *gin.Context) {
 	}
 
 	signature := c.GetHeader("X-CMS-Signature")
-	if err := service.ProcessCMSChange(envelope, body, user.ID, c.ClientIP(), signature); err != nil {
+	result, err := service.ProcessCMSChange(envelope, body, user.ID, c.ClientIP(), signature)
+	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
 		"message":  "CMS change processed safely",
-		"event_id": envelope.EventID,
+		"event_id": result.EventID,
+		"status":   result.Status,
 	})
 }

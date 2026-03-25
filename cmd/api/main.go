@@ -45,6 +45,9 @@ func main() {
 
 		// DOCTOR SERVICE
 		api.POST("/doctor-services", handler.AssignServiceToDoctor)
+
+		// CMS
+		api.POST("/cms/sync", handler.SyncCMSChange)
 	}
 
 	r.Run(":8080")

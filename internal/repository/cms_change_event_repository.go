@@ -15,7 +15,7 @@ func GetCMSChangeEventByEventID(eventID string) (*models.CMSChangeEvent, error) 
 	query := `
 	SELECT id, event_id, source, entity_type, entity_id, action, payload, status, error_message, processed_by, processed_at, created_at
 	FROM cms_change_events
-	WHERE event_id = @p1
+	WHERE event_id = $1
 	`
 
 	err := config.DB.Get(&event, query, eventID)
@@ -37,7 +37,7 @@ func CreateCMSChangeEvent(event *models.CMSChangeEvent) error {
 	query := `
 	INSERT INTO cms_change_events
 	(id, event_id, source, entity_type, entity_id, action, payload, status, error_message, processed_by, processed_at, created_at)
-	VALUES (@p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10, GETDATE(), GETDATE())
+	VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW(), NOW())
 	`
 
 	_, err := config.DB.Exec(
@@ -60,11 +60,11 @@ func CreateCMSChangeEvent(event *models.CMSChangeEvent) error {
 func UpdateCMSChangeEventStatus(eventID, status, errorMessage, processedBy string) error {
 	query := `
 	UPDATE cms_change_events
-	SET status = @p2,
-	    error_message = @p3,
-	    processed_by = @p4,
-	    processed_at = GETDATE()
-	WHERE event_id = @p1
+	SET status = $2,
+	    error_message = $3,
+	    processed_by = $4,
+	    processed_at = NOW()
+	WHERE event_id = $1
 	`
 
 	_, err := config.DB.Exec(query, eventID, status, errorMessage, processedBy)
