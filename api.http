@@ -117,6 +117,48 @@ Content-Type: application/json
 }
 
 ################################
+### APPOINTMENT
+################################
+
+### Create Appointment
+POST http://localhost:8080/api/appointments
+Authorization: Bearer "YOUR_ACCESS_TOKEN"
+Content-Type: application/json
+
+{
+  "clinic_id": "CLINIC_UUID",
+  "doctor_id": "DOCTOR_UUID",
+  "service_id": "SERVICE_UUID",
+  "slot_id": "SLOT_UUID",
+  "payment_window_expires_at": "2026-03-25T18:00:00Z",
+  "total_amount": 500000,
+  "user_pay_amount": 300000,
+  "insured_amount": 200000
+}
+
+### Get My Appointments
+GET http://localhost:8080/api/appointments/me
+Authorization: Bearer "YOUR_ACCESS_TOKEN"
+
+### Get Appointment Detail
+GET http://localhost:8080/api/appointments/APPOINTMENT_UUID
+Authorization: Bearer "YOUR_ACCESS_TOKEN"
+
+### Update Appointment Status
+PATCH http://localhost:8080/api/appointments/APPOINTMENT_UUID/status
+Authorization: Bearer "YOUR_ACCESS_TOKEN"
+Content-Type: application/json
+
+{
+  "status": "CONFIRMED",
+  "reason": "Payment verified"
+}
+
+### Get Appointment History
+GET http://localhost:8080/api/appointments/APPOINTMENT_UUID/history
+Authorization: Bearer "YOUR_ACCESS_TOKEN"
+
+################################
 ### CMS SYNC
 ################################
 

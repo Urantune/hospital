@@ -46,6 +46,13 @@ func main() {
 		// DOCTOR SERVICE
 		api.POST("/doctor-services", handler.AssignServiceToDoctor)
 
+		// APPOINTMENTS
+		api.POST("/appointments", handler.CreateAppointment)
+		api.GET("/appointments/me", handler.GetMyAppointments)
+		api.GET("/appointments/:id", handler.GetAppointment)
+		api.GET("/appointments/:id/history", handler.GetAppointmentHistory)
+		api.PATCH("/appointments/:id/status", handler.UpdateAppointmentStatus)
+
 		// CMS
 		api.POST("/cms/sync", handler.SyncCMSChange)
 	}
