@@ -53,6 +53,14 @@ func main() {
 		api.GET("/appointments/:id/history", handler.GetAppointmentHistory)
 		api.PATCH("/appointments/:id/status", handler.UpdateAppointmentStatus)
 
+		// SCHEDULES
+		api.POST("/schedules", handler.CreateSchedule)
+		api.POST("/slots/generate", handler.GenerateSlots)
+		api.GET("/slots/available", handler.GetAvailableSlots)
+		api.POST("/schedules/:id/impact", handler.CheckScheduleImpact)
+		api.POST("/schedules/:id/exceptions", handler.CreateExceptionDay)
+		api.POST("/slots/:id/lock", handler.LockSlot)
+
 		// CMS
 		api.POST("/cms/sync", handler.SyncCMSChange)
 	}
