@@ -204,6 +204,8 @@ Content-Type: application/json
   }
 }
 
+
+
 ################################
 ### USER
 ################################
@@ -213,6 +215,28 @@ POST http://localhost:8080/api/logout
 Authorization: Bearer "YOUR_ACCESS_TOKEN"
 
 
+### Appointment precondition validation
+POST http://localhost:8080/api/appointments
+Authorization: Bearer ACCESS_TOKEN
+Content-Type: application/json
+
+{
+  "clinic_id": "CLINIC_ID",
+  "doctor_id": "DOCTOR_ID",
+  "service_id": "SERVICE_ID",
+  "slot_id": "SLOT_ID"
+}
+
+### Appointment state machine
+PATCH http://localhost:8080/api/appointments/{id}/status
+Authorization: Bearer ACCESS_TOKEN
+
+{
+"status": "CONFIRMED"
+}
+
+
+###
 Register
    ↓
 Login

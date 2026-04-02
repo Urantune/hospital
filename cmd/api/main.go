@@ -4,6 +4,7 @@ import (
 	"hospital/internal/config"
 	"hospital/internal/handler"
 	"hospital/internal/middleware"
+	"hospital/internal/service"
 
 	"github.com/gin-gonic/gin"
 )
@@ -12,9 +13,10 @@ func main() {
 
 	config.ConnectDB()
 
+	service.StartExpireJob()
+
 	r := gin.Default()
 
-	// AUTH
 	authRoutes := r.Group("/auth")
 	{
 		authRoutes.POST("/register", handler.Register)
@@ -23,7 +25,8 @@ func main() {
 		authRoutes.POST("/refresh", handler.Refresh)
 	}
 
-	// PROTECTED ROUTES
+	r.POST("/payments/callback", handler.HandlePaymentCallback)
+
 	api := r.Group("/api")
 	api.Use(middleware.AuthMiddleware())
 	{
@@ -38,7 +41,7 @@ func main() {
 		api.PUT("/doctors/:id/activate", handler.ActivateDoctor)
 		api.PUT("/doctors/:id/deactivate", handler.DeactivateDoctor)
 
-		// SERVICES
+		// CLINIC + SERVICE
 		api.POST("/clinics", handler.CreateClinic)
 		api.POST("/services", handler.CreateService)
 		api.GET("/services", handler.GetServices)
@@ -52,10 +55,11 @@ func main() {
 		api.GET("/appointments/:id", handler.GetAppointment)
 		api.GET("/appointments/:id/history", handler.GetAppointmentHistory)
 		api.PATCH("/appointments/:id/status", handler.UpdateAppointmentStatus)
+
 		api.POST("/appointments/:id/payments/initiate", handler.CreateAppointmentPayment)
 		api.GET("/appointments/:id/financial-snapshot", handler.GetAppointmentFinancialSnapshot)
 		api.GET("/appointments/:id/events", handler.GetAppointmentDomainEvents)
-		api.POST("/payments/callback", handler.HandlePaymentCallback)
+
 		api.GET("/payments/:id/history", handler.GetPaymentHistory)
 
 		// SCHEDULES
