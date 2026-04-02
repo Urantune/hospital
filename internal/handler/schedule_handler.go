@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type GenerateSlotsRequest struct {
@@ -106,6 +107,49 @@ func CheckScheduleImpact(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"affected_appointments": impactedCount,
+	})
+}
+
+func UpdateScheduleWithEnforcement(c *gin.Context) {
+	doctorID := c.Param("id")
+
+	var req models.DoctorSchedule
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if req.DoctorID == uuid.Nil {
+		parsedDoctorID, err := uuid.Parse(doctorID)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid doctor id"})
+			return
+		}
+		req.DoctorID = parsedDoctorID
+	}
+
+	canChange, reason, err := service.EnforceScheduleChangeConstraints(doctorID, req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	if !canChange {
+		c.JSON(http.StatusConflict, gin.H{
+			"error":      reason,
+			"error_code": "SCHEDULE_CHANGE_BLOCKED",
+		})
+		return
+	}
+
+	if err := service.SetDoctorSchedule(req); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message":   "schedule updated successfully",
+		"doctor_id": doctorID,
 	})
 }
 

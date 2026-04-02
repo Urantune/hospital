@@ -149,6 +149,19 @@ func GetAvailableSlots(doctorID string, date string) ([]models.TimeSlot, error) 
 	return slots, nil
 }
 
+func EnforceScheduleChangeConstraints(doctorID string, newSchedule models.DoctorSchedule) (bool, string, error) {
+	impactedCount, err := CheckScheduleImpact(doctorID, newSchedule)
+	if err != nil {
+		return false, "", err
+	}
+
+	if impactedCount > 0 {
+		return false, fmt.Sprintf("schedule change would affect %d existing appointments", impactedCount), nil
+	}
+
+	return true, "", nil
+}
+
 func CheckScheduleImpact(doctorID string, newSchedule models.DoctorSchedule) (int, error) {
 	appointments, err := repository.ListAppointmentsByDoctor(doctorID)
 	if err != nil {

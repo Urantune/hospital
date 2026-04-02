@@ -5,6 +5,11 @@ import (
 	"hospital/internal/handler"
 	"hospital/internal/middleware"
 	"hospital/internal/service"
+	"log"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -14,6 +19,22 @@ func main() {
 	config.ConnectDB()
 
 	service.StartExpireJob()
+
+	appInit, err := service.InitializeServices(1*time.Minute, 5*time.Minute)
+	if err != nil {
+		log.Fatalf("failed to initialize services: %v", err)
+	}
+	service.SetAppInitializer(appInit)
+	defer appInit.Shutdown()
+
+	go func() {
+		sigChan := make(chan os.Signal, 1)
+		signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+		<-sigChan
+		log.Println("[Main] received shutdown signal")
+		_ = appInit.Shutdown()
+		os.Exit(0)
+	}()
 
 	r := gin.Default()
 
@@ -50,6 +71,13 @@ func main() {
 		// DOCTOR SERVICE
 		api.POST("/doctor-services", handler.AssignServiceToDoctor)
 
+		// INSURANCE
+		api.POST("/insurance/plans", handler.CreateInsurancePlan)
+		api.GET("/insurance/plans/:id", handler.GetInsurancePlan)
+		api.PUT("/insurance/plans/:id", handler.UpdateInsurancePlan)
+		api.GET("/insurance/plans", handler.ListInsurancePlans)
+		api.POST("/insurance/plans/:id/service-coverage", handler.SetServiceCoverage)
+
 		// APPOINTMENTS
 		api.POST("/appointments", handler.CreateAppointment)
 		api.GET("/appointments/me", handler.GetMyAppointments)
@@ -68,8 +96,26 @@ func main() {
 		api.POST("/slots/generate", handler.GenerateSlots)
 		api.GET("/slots/available", handler.GetAvailableSlots)
 		api.POST("/schedules/:id/impact", handler.CheckScheduleImpact)
+		api.PUT("/schedules/:id/enforce", handler.UpdateScheduleWithEnforcement)
 		api.POST("/schedules/:id/exceptions", handler.CreateExceptionDay)
 		api.POST("/slots/:id/lock", handler.LockSlot)
+
+		// MONITORING & HEALTH
+		api.GET("/monitoring/dashboard", handler.GetSystemHealthDashboard)
+		api.GET("/monitoring/appointments", handler.GetAppointmentMetrics)
+		api.GET("/monitoring/payments", handler.GetPaymentMetrics)
+		api.GET("/monitoring/reminders", handler.GetReminderMetrics)
+		api.GET("/monitoring/clinic", handler.GetClinicMetrics)
+		api.GET("/monitoring/users", handler.GetUserMetrics)
+		api.GET("/monitoring/metrics-by-range", handler.GetMetricsForDateRange)
+
+		// REMINDERS
+		api.GET("/reminders/:id", handler.GetReminder)
+		api.GET("/reminders/appointment/:appointment_id", handler.ListReminders)
+		api.POST("/reminders/:id/cancel", handler.CancelReminder)
+
+		// AUDIT
+		api.GET("/audit-logs", handler.ListAuditLogs)
 
 		// CMS
 		api.POST("/cms/sync", handler.SyncCMSChange)
