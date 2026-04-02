@@ -15,7 +15,7 @@ func CreateAuditLog(log *models.AuditLog) error {
 	query := `
 	INSERT INTO audit_logs
 	(id, user_id, clinic_id, action, resource, resource_id, description, ip_address, created_at)
-	VALUES (@p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, GETDATE())
+	VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW())
 	`
 
 	_, err := config.DB.Exec(
@@ -40,9 +40,10 @@ func ListAuditLogs(limit int) ([]models.AuditLog, error) {
 
 	var logs []models.AuditLog
 	query := `
-	SELECT TOP (@p1) id, user_id, clinic_id, action, resource, resource_id, description, ip_address, created_at
+	SELECT id, user_id, clinic_id, action, resource, resource_id, description, ip_address, created_at
 	FROM audit_logs
 	ORDER BY created_at DESC
+	LIMIT $1
 	`
 
 	err := config.DB.Select(&logs, query, limit)

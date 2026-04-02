@@ -63,6 +63,24 @@ func ListAppointmentsByPatient(patientID string) ([]models.Appointment, error) {
 	return appointments, nil
 }
 
+func ListAppointmentsByDoctor(doctorID string) ([]models.Appointment, error) {
+	var appointments []models.Appointment
+
+	query := `
+	SELECT id, patient_id, clinic_id, doctor_id, service_id, slot_id, status, payment_window_expires_at, total_amount, user_pay_amount, insured_amount, created_at, updated_at
+	FROM appointments
+	WHERE doctor_id = $1
+	ORDER BY created_at DESC
+	`
+
+	err := config.DB.Select(&appointments, query, doctorID)
+	if err != nil {
+		return nil, err
+	}
+
+	return appointments, nil
+}
+
 func UpdateAppointmentStatus(id, status string) error {
 	query := `
 	UPDATE appointments
