@@ -5,6 +5,9 @@ import (
 	"errors"
 	"hospital/internal/models"
 	"hospital/internal/repository"
+	"time"
+
+	"github.com/google/uuid"
 )
 
 type CreateAppointmentInput struct {
@@ -48,18 +51,27 @@ var appointmentTransitions = map[string]map[string]bool{
 }
 
 func CreateAppointment(input CreateAppointmentInput, changedBy string) (*models.Appointment, error) {
-	if input.PatientID == "" || input.ClinicID == "" || input.DoctorID == "" || input.ServiceID == "" || input.SlotID == "" {
-		return nil, errors.New("patient_id, clinic_id, doctor_id, service_id and slot_id are required")
+	if err := repository.ValidateBooking(
+		input.SlotID,
+		input.DoctorID,
+		input.ServiceID,
+		input.ClinicID,
+		input.PatientID,
+	); err != nil {
+		return nil, err
 	}
 
+	expireTime := time.Now().Add(15 * time.Minute)
+
 	appointment := &models.Appointment{
+		ID:                     uuid.New().String(),
 		PatientID:              input.PatientID,
 		ClinicID:               input.ClinicID,
 		DoctorID:               input.DoctorID,
 		ServiceID:              input.ServiceID,
 		SlotID:                 input.SlotID,
-		Status:                 "CREATED",
-		PaymentWindowExpiresAt: input.PaymentWindowExpiresAt,
+		Status:                 "PENDING_PAYMENT",
+		PaymentWindowExpiresAt: &expireTime,
 		TotalAmount:            input.TotalAmount,
 		UserPayAmount:          input.UserPayAmount,
 		InsuredAmount:          input.InsuredAmount,
@@ -69,15 +81,14 @@ func CreateAppointment(input CreateAppointmentInput, changedBy string) (*models.
 		return nil, err
 	}
 
-	if err := repository.CreateAppointmentStateHistory(&models.AppointmentStateHistory{
-		AppointmentID: appointment.ID,
-		FromState:     nil,
-		ToState:       appointment.Status,
-		ChangedBy:     changedBy,
-		Reason:        nil,
-	}); err != nil {
+	if err := repository.MarkSlotBooked(input.SlotID); err != nil {
 		return nil, err
 	}
+
+	from := ""
+	to := "PENDING_PAYMENT"
+
+	repository.InsertStateHistory(appointment.ID, from, to, changedBy)
 
 	return appointment, nil
 }
@@ -159,4 +170,14 @@ func canTransitionAppointment(fromState, toState string) bool {
 	}
 
 	return allowedNext[toState]
+}
+
+func StartExpireJob() {
+
+	go func() {
+		for {
+			repository.ExpireAppointments()
+			time.Sleep(30 * time.Second)
+		}
+	}()
 }

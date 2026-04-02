@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"errors"
 	"hospital/internal/config"
 	"hospital/internal/models"
 )
@@ -127,4 +128,141 @@ func ListAppointmentStateHistory(appointmentID string) ([]models.AppointmentStat
 	}
 
 	return items, nil
+}
+
+func ValidateBooking(slotID, doctorID, clinicID, serviceID, userID string) error {
+
+	var slotStatus string
+	err := config.DB.Get(&slotStatus,
+		`SELECT status FROM time_slot WHERE id = $1`, slotID)
+	if err != nil {
+		return errors.New("slot not found")
+	}
+	if slotStatus != "available" {
+		return errors.New("slot not available")
+	}
+
+	var lockCount int
+	err = config.DB.Get(&lockCount,
+		`SELECT COUNT(*) FROM slot_lock 
+		 WHERE slot_id=$1 AND locked_until > now()`, slotID)
+
+	if lockCount > 0 {
+		return errors.New("slot is locked")
+	}
+
+	var doctorStatus string
+	err = config.DB.Get(&doctorStatus,
+		`SELECT status FROM doctors WHERE id=$1`, doctorID)
+
+	if doctorStatus != "active" {
+		return errors.New("doctor inactive")
+	}
+
+	var mapCount int
+	err = config.DB.Get(&mapCount,
+		`SELECT COUNT(*) FROM doctor_service_mapping 
+		 WHERE doctor_id=$1 AND service_id=$2`,
+		doctorID, serviceID)
+
+	if mapCount == 0 {
+		return errors.New("service not supported by doctor")
+	}
+
+	var userStatus string
+	err = config.DB.Get(&userStatus,
+		`SELECT status FROM users WHERE id=$1`, userID)
+
+	if userStatus != "active" {
+		return errors.New("user inactive")
+	}
+
+	var count int
+	err = config.DB.Get(&count, `
+	SELECT COUNT(*) FROM time_slot
+	WHERE id=$1 AND doctor_id=$2 AND clinic_id=$3 AND status='available'
+`, slotID, doctorID, clinicID)
+
+	if err != nil {
+		return err
+	}
+	if count == 0 {
+		return errors.New("invalid slot")
+	}
+
+	return nil
+}
+
+func MarkSlotBooked(slotID string) error {
+	_, err := config.DB.Exec(`
+		UPDATE time_slot
+		SET status='booked'
+		WHERE id=$1
+	`, slotID)
+	return err
+}
+
+func InsertStateHistory(appointmentID, from, to, userID string) {
+	config.DB.Exec(`
+	INSERT INTO appointment_state_history
+	(appointment_id, from_state, to_state, changed_by, created_at)
+	VALUES ($1,$2,$3,$4,now())
+	`, appointmentID, from, to, userID)
+}
+
+func ExpireAppointments() error {
+
+	rows, err := config.DB.Query(`
+	SELECT id, slot_id FROM appointments
+	WHERE status='PENDING_PAYMENT'
+	AND payment_window_expires_at < now()
+	`)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var id, slotID string
+		rows.Scan(&id, &slotID)
+
+		tx, err := config.DB.Begin()
+		if err != nil {
+			return err
+		}
+
+		_, err = tx.Exec(`
+			UPDATE appointments
+			SET status='CANCELLED', updated_at=now()
+			WHERE id=$1
+		`, id)
+		if err != nil {
+			tx.Rollback()
+			continue
+		}
+
+		_, err = tx.Exec(`
+			UPDATE time_slot
+			SET status='available'
+			WHERE id=$1
+		`, slotID)
+		if err != nil {
+			tx.Rollback()
+			continue
+		}
+
+		_, err = tx.Exec(`
+			INSERT INTO appointment_state_history
+			(appointment_id, from_state, to_state, changed_by, created_at)
+			VALUES ($1,$2,$3,$4,now())
+		`, id, "PENDING_PAYMENT", "CANCELLED", "system")
+		if err != nil {
+			tx.Rollback()
+			continue
+		}
+
+		tx.Commit()
+	}
+
+	return nil
 }
