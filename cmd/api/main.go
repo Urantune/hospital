@@ -52,6 +52,11 @@ func main() {
 		api.GET("/appointments/:id", handler.GetAppointment)
 		api.GET("/appointments/:id/history", handler.GetAppointmentHistory)
 		api.PATCH("/appointments/:id/status", handler.UpdateAppointmentStatus)
+		api.POST("/appointments/:id/payments/initiate", handler.CreateAppointmentPayment)
+		api.GET("/appointments/:id/financial-snapshot", handler.GetAppointmentFinancialSnapshot)
+		api.GET("/appointments/:id/events", handler.GetAppointmentDomainEvents)
+		api.POST("/payments/callback", handler.HandlePaymentCallback)
+		api.GET("/payments/:id/history", handler.GetPaymentHistory)
 
 		// SCHEDULES
 		api.POST("/schedules", handler.CreateSchedule)

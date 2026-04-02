@@ -95,7 +95,15 @@ func ListAppointmentHistory(appointmentID string) ([]models.AppointmentStateHist
 }
 
 func UpdateAppointmentStatus(appointmentID string, input UpdateAppointmentStatusInput, changedBy string) (*models.Appointment, error) {
-	if input.Status == "" {
+	return transitionAppointmentStatus(appointmentID, input.Status, input.Reason, changedBy)
+}
+
+func TransitionAppointmentStatus(appointmentID, status, reason, changedBy string) (*models.Appointment, error) {
+	return transitionAppointmentStatus(appointmentID, status, reason, changedBy)
+}
+
+func transitionAppointmentStatus(appointmentID, status, reasonText, changedBy string) (*models.Appointment, error) {
+	if status == "" {
 		return nil, errors.New("status is required")
 	}
 
@@ -107,11 +115,11 @@ func UpdateAppointmentStatus(appointmentID string, input UpdateAppointmentStatus
 		return nil, err
 	}
 
-	if !canTransitionAppointment(appointment.Status, input.Status) {
+	if !canTransitionAppointment(appointment.Status, status) {
 		return nil, errors.New("invalid appointment status transition")
 	}
 
-	if err := repository.UpdateAppointmentStatus(appointmentID, input.Status); err != nil {
+	if err := repository.UpdateAppointmentStatus(appointmentID, status); err != nil {
 		return nil, err
 	}
 
@@ -122,15 +130,15 @@ func UpdateAppointmentStatus(appointmentID string, input UpdateAppointmentStatus
 	}
 
 	var reason *string
-	if input.Reason != "" {
-		r := input.Reason
+	if reasonText != "" {
+		r := reasonText
 		reason = &r
 	}
 
 	if err := repository.CreateAppointmentStateHistory(&models.AppointmentStateHistory{
 		AppointmentID: appointmentID,
 		FromState:     fromState,
-		ToState:       input.Status,
+		ToState:       status,
 		ChangedBy:     changedBy,
 		Reason:        reason,
 	}); err != nil {
