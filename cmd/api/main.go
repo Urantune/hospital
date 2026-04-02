@@ -42,6 +42,7 @@ func main() {
 		api.POST("/clinics", handler.CreateClinic)
 		api.POST("/services", handler.CreateService)
 		api.GET("/services", handler.GetServices)
+		api.POST("/pricing/preview", handler.PreviewPrice)
 
 		// DOCTOR SERVICE
 		api.POST("/doctor-services", handler.AssignServiceToDoctor)

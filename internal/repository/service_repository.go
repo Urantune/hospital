@@ -33,7 +33,10 @@ func GetAllServices() ([]models.MedicalService, error) {
 	err := config.DB.Select(&services, query)
 	return services, err
 }
-func ListAppointmentsByDoctor(doctorID string) ([]models.Appointment, error) {
-	// Trả về một danh sách rỗng để nó không thắc mắc nữa
-	return []models.Appointment{}, nil
+
+func GetServiceByID(id string) (models.MedicalService, error) {
+	var service models.MedicalService
+	query := `SELECT id, name, description, default_duration_minutes, base_price, status FROM medical_services WHERE id = $1`
+	err := config.DB.Get(&service, query, id)
+	return service, err
 }

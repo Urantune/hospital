@@ -39,3 +39,28 @@ func GetServices(c *gin.Context) {
 
 	c.JSON(http.StatusOK, services)
 }
+
+func PreviewPrice(c *gin.Context) {
+
+	var request struct {
+		ServiceID string `json:"service_id" binding:"required"`
+	}
+
+	if err := c.ShouldBindJSON(&request); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Thiếu mã dịch vụ!"})
+		return
+	}
+
+	service, err := repository.GetServiceByID(request.ServiceID)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Không tìm thấy dịch vụ này!"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"service_id":   service.ID,
+		"service_name": service.Name,
+		"base_price":   service.BasePrice,
+		"total_price":  service.BasePrice,
+	})
+}
