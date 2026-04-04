@@ -16,6 +16,11 @@ type Appointment struct {
 	InsuredAmount          float64    `db:"insured_amount" json:"insured_amount"`
 	CreatedAt              string     `db:"created_at" json:"created_at"`
 	UpdatedAt              string     `db:"updated_at" json:"updated_at"`
+	StartTime              time.Time  `db:"start_time" json:"start_time"`
+	BasePriceAtBooking     float64    `db:"base_price_at_booking" json:"base_price_at_booking"`
+	SurchargeAtBooking     float64    `db:"surcharge_at_booking" json:"surcharge_at_booking"`
+	TotalPriceAtBooking    float64    `db:"total_price_at_booking" json:"total_price_at_booking"`
+	AppliedPolicySnapshot  string     `db:"applied_policy_snapshot" json:"applied_policy_snapshot"`
 }
 
 type AppointmentStateHistory struct {

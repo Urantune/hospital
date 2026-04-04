@@ -26,6 +26,10 @@ func CreateAppointment(appointment *models.Appointment) error {
 		appointment.TotalAmount,
 		appointment.UserPayAmount,
 		appointment.InsuredAmount,
+		appointment.BasePriceAtBooking,
+		appointment.SurchargeAtBooking,
+		appointment.TotalPriceAtBooking,
+		appointment.AppliedPolicySnapshot,
 	).Scan(&appointment.ID, &appointment.CreatedAt, &appointment.UpdatedAt)
 }
 
@@ -33,7 +37,7 @@ func GetAppointmentByID(id string) (*models.Appointment, error) {
 	var appointment models.Appointment
 
 	query := `
-	SELECT id, patient_id, clinic_id, doctor_id, service_id, slot_id, status, payment_window_expires_at, total_amount, user_pay_amount, insured_amount, created_at, updated_at
+	SELECT id, patient_id, clinic_id, doctor_id, service_id, slot_id, status, payment_window_expires_at, total_amount, user_pay_amount, insured_amount, start_time, created_at, updated_at
 	FROM appointments
 	WHERE id = $1
 	`
