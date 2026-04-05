@@ -14,7 +14,7 @@ Content-Type: application/json
 ###
 
 ### Verify Account
-GET http://localhost:8080/auth/verify?token=YOUR_VERIFY_TOKEN
+GET http://localhost:8080/auth/verify?token=af606098-a900-48e4-a2cd-7595810c14aa
 
 ###
 
@@ -227,6 +227,10 @@ Content-Type: application/json
   "slot_id": "SLOT_ID"
 }
 
+###
+GET http://localhost:8080/api/activities
+Authorization: Bearer ACCESS_TOKEN
+
 ### Appointment state machine
 PATCH http://localhost:8080/api/appointments/{id}/status
 Authorization: Bearer ACCESS_TOKEN
@@ -234,6 +238,8 @@ Authorization: Bearer ACCESS_TOKEN
 {
 "status": "CONFIRMED"
 }
+
+
 
 
 ###

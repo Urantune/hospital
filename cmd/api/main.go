@@ -116,6 +116,7 @@ func main() {
 
 		// AUDIT
 		api.GET("/audit-logs", handler.ListAuditLogs)
+		api.GET("/activities", handler.GetActivityLogs)
 
 		// CMS
 		api.POST("/cms/sync", handler.SyncCMSChange)
