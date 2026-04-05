@@ -36,6 +36,16 @@ func main() {
 		os.Exit(0)
 	}()
 
+	go func() {
+		for {
+			err := service.RunReconciliation()
+			if err != nil {
+				log.Println("[Reconciliation Error]:", err)
+			}
+			time.Sleep(5 * time.Minute)
+		}
+	}()
+
 	r := gin.Default()
 
 	authRoutes := r.Group("/auth")

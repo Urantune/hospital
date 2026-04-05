@@ -209,6 +209,21 @@ func HandlePaymentCallback(input HandlePaymentCallbackInput, changedBy, ipAddres
 		Status:                 input.Status,
 	})
 
+	validStatuses := map[string]bool{
+		"initiated":        true,
+		"success":          true,
+		"failed":           true,
+		"refunded":         true,
+		"partial_refunded": true,
+	}
+
+	if !validStatuses[input.Status] {
+		return "", nil, errors.New("invalid payment status")
+	}
+	if !canTransitionPayment(payment.Status, input.Status) {
+		return "", nil, errors.New("invalid payment state transition")
+	}
+
 	_ = repository.CreatePaymentCallbackReceipt(&models.PaymentCallbackReceipt{
 		CallbackID:      input.CallbackID,
 		PaymentID:       payment.ID,
@@ -218,7 +233,6 @@ func HandlePaymentCallback(input HandlePaymentCallbackInput, changedBy, ipAddres
 		RawPayload:      callbackPayload,
 		Notes:           "Callback applied",
 	})
-
 	appointment, err := repository.GetAppointmentByID(payment.AppointmentID)
 	if err == nil {
 		switch input.Status {

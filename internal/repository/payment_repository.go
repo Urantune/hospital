@@ -240,3 +240,45 @@ func GetPaymentCallbackReceiptByCallbackID(callbackID string) (*models.PaymentCa
 
 	return &receipt, nil
 }
+
+func PaymentStatus(paymentID string, newStatus string) error {
+	tx, err := config.DB.Begin()
+	if err != nil {
+		return err
+	}
+
+	var oldStatus string
+	err = tx.QueryRow(`
+		SELECT status FROM payments WHERE id=$1
+	`, paymentID).Scan(&oldStatus)
+
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	_, err = tx.Exec(`
+		UPDATE payments
+		SET status=$1, updated_at=now()
+		WHERE id=$2
+	`, newStatus, paymentID)
+
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	// insert history
+	_, err = tx.Exec(`
+		INSERT INTO payment_state_history
+		(payment_id, from_state, to_state, created_at)
+		VALUES ($1,$2,$3,now())
+	`, paymentID, oldStatus, newStatus)
+
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return tx.Commit()
+}
