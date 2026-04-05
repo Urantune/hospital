@@ -19,6 +19,7 @@ func main() {
 	config.ConnectDB()
 
 	service.StartExpireJob()
+	service.StartNotificationWorker()
 
 	appInit, err := service.InitializeServices(1*time.Minute, 5*time.Minute)
 	if err != nil {

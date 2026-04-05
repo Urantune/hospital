@@ -54,8 +54,8 @@ func CreateAppointment(input CreateAppointmentInput, changedBy string) (*models.
 	if err := repository.ValidateBooking(
 		input.SlotID,
 		input.DoctorID,
-		input.ServiceID,
 		input.ClinicID,
+		input.ServiceID,
 		input.PatientID,
 	); err != nil {
 		return nil, err

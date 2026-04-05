@@ -152,3 +152,43 @@ func GetAppointmentInsuranceSnapshot(c *gin.Context) {
 
 	c.JSON(http.StatusOK, snapshot)
 }
+
+type CalculateCoverageRequest struct {
+	ServiceID       string  `json:"service_id" binding:"required"`
+	InsurancePlanID string  `json:"insurance_plan_id" binding:"required"`
+	TotalAmount     float64 `json:"total_amount" binding:"required"`
+}
+
+func CalculateInsuranceCoverage(c *gin.Context) {
+	var req CalculateCoverageRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload."})
+		return
+	}
+
+	plan, err := repository.GetInsurancePlanByID(req.InsurancePlanID)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Insurance plan not found"})
+		return
+	}
+
+	coveragePercent := plan.CoveragePercentage
+
+	customCov, err := repository.GetInsuranceServiceCoverage(req.InsurancePlanID, req.ServiceID)
+
+	if err == nil && customCov != nil {
+		coveragePercent = *customCov
+	}
+
+	insuredAmount := req.TotalAmount * (coveragePercent / 100.0)
+	userPayAmount := req.TotalAmount - insuredAmount
+
+	c.JSON(http.StatusOK, gin.H{
+		"service_id":        req.ServiceID,
+		"insurance_plan_id": req.InsurancePlanID,
+		"total_amount":      req.TotalAmount,
+		"coverage_percent":  coveragePercent,
+		"insured_amount":    insuredAmount,
+		"user_pay_amount":   userPayAmount,
+	})
+}

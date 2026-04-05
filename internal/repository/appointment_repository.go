@@ -9,8 +9,8 @@ import (
 func CreateAppointment(appointment *models.Appointment) error {
 	query := `
 	INSERT INTO appointments
-	(patient_id, clinic_id, doctor_id, service_id, slot_id, status, payment_window_expires_at, total_amount, user_pay_amount, insured_amount, created_at, updated_at)
-	VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW(), NOW())
+	(patient_id, clinic_id, doctor_id, service_id, slot_id, status, payment_window_expires_at, total_amount, user_pay_amount, insured_amount, base_price_at_booking, surcharge_at_booking, total_price_at_booking, applied_policy_snapshot, created_at, updated_at)
+	VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, NOW(), NOW())
 	RETURNING id, created_at, updated_at
 	`
 
@@ -269,4 +269,22 @@ func ExpireAppointments() error {
 	}
 
 	return nil
+}
+
+func ListAuditLogsByResource(resource string, resourceID string) ([]models.AuditLog, error) {
+	var logs []models.AuditLog
+
+	query := `
+	SELECT id, user_id, clinic_id, action, resource, resource_id, description, ip_address, created_at
+	FROM audit_logs
+	WHERE resource = $1 AND resource_id = $2
+	ORDER BY created_at DESC
+	`
+
+	err := config.DB.Select(&logs, query, resource, resourceID)
+	if err != nil {
+		return nil, err
+	}
+
+	return logs, nil
 }

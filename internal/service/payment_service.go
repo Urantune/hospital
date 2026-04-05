@@ -4,9 +4,37 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"hospital/internal/models"
 	"hospital/internal/repository"
 )
+
+type PaymentGateway interface {
+	GeneratePaymentURL(paymentID string, amount float64, currency string) (string, error)
+}
+
+type MomoGateway struct{}
+
+func (m *MomoGateway) GeneratePaymentURL(paymentID string, amount float64, currency string) (string, error) {
+	return fmt.Sprintf("https://test-payment.momo.vn/pay?id=%s&amount=%.2f&ccy=%s", paymentID, amount, currency), nil
+}
+
+type VNPayGateway struct{}
+
+func (v *VNPayGateway) GeneratePaymentURL(paymentID string, amount float64, currency string) (string, error) {
+	return fmt.Sprintf("https://sandbox.vnpayment.vn/paymentv2/vpcpay.html?txnRef=%s&amount=%.2f&ccy=%s", paymentID, amount, currency), nil
+}
+
+func GetPaymentGatewayProvider(gatewayName string) (PaymentGateway, error) {
+	switch gatewayName {
+	case "MOMO":
+		return &MomoGateway{}, nil
+	case "VNPAY":
+		return &VNPayGateway{}, nil
+	default:
+		return nil, errors.New("unsupported payment gateway provider: " + gatewayName)
+	}
+}
 
 type CreateAppointmentPaymentInput struct {
 	AppointmentID              string
