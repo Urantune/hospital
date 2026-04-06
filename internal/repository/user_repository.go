@@ -5,6 +5,8 @@ import (
 	"errors"
 	"hospital/internal/config"
 	"hospital/internal/models"
+
+	"log"
 )
 
 func CreateUser(user *models.User) error {
@@ -62,6 +64,8 @@ func GetUserByID(userID string) (*models.User, error) {
 
 	err := config.DB.Get(&user, query, userID)
 	if err != nil {
+		log.Println("ERROR LOAD USER:", err) // 👈 thêm dòng này
+
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, sql.ErrNoRows
 		}

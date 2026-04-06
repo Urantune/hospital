@@ -1,6 +1,9 @@
 package models
 
-import "database/sql"
+import (
+	"database/sql"
+	"time"
+)
 
 type User struct {
 	ID                string         `db:"id"`
@@ -16,8 +19,8 @@ type User struct {
 	ClinicID          sql.NullString `db:"clinic_id"`
 	VerificationToken sql.NullString `db:"verification_token"`
 	RoleID            sql.NullInt64  `db:"role_id"`
-	CreatedAt         string         `db:"created_at"`
-	UpdatedAt         string         `db:"updated_at"`
+	CreatedAt         time.Time      `db:"created_at"`
+	UpdatedAt         time.Time      `db:"updated_at"`
 }
 
 type Role struct {

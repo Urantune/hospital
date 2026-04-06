@@ -8,13 +8,18 @@ Content-Type: application/json
 
 {
   "email": "test@gmail.com",
-  "password": "123456"
+  "password": "123456",
+  "full_name": "Nguyen Van A",
+  "phone": "0909123456",
+  "address": "123 Nguyen Trai, HCM",
+  "date_of_birth": "2000-01-01",
+  "role": "ROLE_ADMIN"
 }
 
 ###
 
 ### Verify Account
-GET http://localhost:8080/auth/verify?token=af606098-a900-48e4-a2cd-7595810c14aa
+GET http://localhost:8080/auth/verify?token=99602e66-313e-43a1-bbee-6b60dffc72d5
 
 ###
 
@@ -34,7 +39,7 @@ POST http://localhost:8080/auth/refresh
 Content-Type: application/json
 
 {
-  "refresh_token": "YOUR_REFRESH_TOKEN"
+  "refresh_token": "92b48aa2-e710-4cfd-9477-1e91e6d31d51"
 }
 
 ################################
@@ -43,14 +48,15 @@ Content-Type: application/json
 
 ### Create Clinic
 POST http://localhost:8080/api/clinics
-Authorization: Bearer "YOUR_ACCESS_TOKEN"
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NzU0ODc0NDgsInVzZXJfaWQiOiI1MDFmOGFiYS00MjA0LTQyYjktOWQ2My1iNGNmMTZjYWFkOWYifQ.HCRWnQVa_cPpwx8nDCmQXoQvPBdN1Vy-l7fyLIDYuAU
 Content-Type: application/json
 
 {
+  "code": "CLINIC001",
   "name": "City Hospital",
-  "address": "123 Nguyen Trai",
-  "phone": "0909000000",
-  "status": "active"
+  "status": "active",
+  "effective_from": "2026-01-01",
+  "effective_to": "2030-12-31"
 }
 
 ################################
@@ -59,26 +65,28 @@ Content-Type: application/json
 
 ### Create Doctor
 POST http://localhost:8080/api/doctors
-Authorization: Bearer "YOUR_ACCESS_TOKEN"
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NzU0ODc2ODEsInVzZXJfaWQiOiI1MDFmOGFiYS00MjA0LTQyYjktOWQ2My1iNGNmMTZjYWFkOWYifQ.miN0MvZJmFHsb0n5mEKnRbplo09IE-H1uTrKo7fwJi0
 Content-Type: application/json
 
 {
-  "user_id": "USER_UUID",
-  "clinic_id": "CLINIC_UUID",
-  "specialization": "Cardiology"
+  "user_id": "501f8aba-4204-42b9-9d63-b4cf16caad9f",
+  "clinic_id": "6875b3cc-363e-47ad-9769-ca9d78776cc7",
+  "specialization": "Cardiology",
+  "status": "active"
 }
 
 ###
 
 ### Deactivate Doctor
-PUT http://localhost:8080/api/doctors/DOCTOR_UUID/deactivate
-Authorization: Bearer "YOUR_ACCESS_TOKEN"
+PUT http://localhost:8080/api/doctors/3c056dfb-da60-412d-a819-912ab58c2e21/deactivate
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NzU0ODk4NDAsInVzZXJfaWQiOiI1MDFmOGFiYS00MjA0LTQyYjktOWQ2My1iNGNmMTZjYWFkOWYifQ.SG55Bj5dm1YO1RaWR-AoJnOTkG_8sPx1zWe5l_jbepM
 
 ###
 
 ### Activate Doctor
-PUT http://localhost:8080/api/doctors/DOCTOR_UUID/activate
-Authorization: Bearer "YOUR_ACCESS_TOKEN"
+PUT http://localhost:8080/api/doctors/3c056dfb-da60-412d-a819-912ab58c2e21/activate
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NzU0ODk4NDAsInVzZXJfaWQiOiI1MDFmOGFiYS00MjA0LTQyYjktOWQ2My1iNGNmMTZjYWFkOWYifQ.SG55Bj5dm1YO1RaWR-AoJnOTkG_8sPx1zWe5l_jbepM
+
 
 ################################
 ### MEDICAL SERVICE
@@ -86,20 +94,22 @@ Authorization: Bearer "YOUR_ACCESS_TOKEN"
 
 ### Create Service
 POST http://localhost:8080/api/services
-Authorization: Bearer "YOUR_ACCESS_TOKEN"
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NzU0ODk4NDAsInVzZXJfaWQiOiI1MDFmOGFiYS00MjA0LTQyYjktOWQ2My1iNGNmMTZjYWFkOWYifQ.SG55Bj5dm1YO1RaWR-AoJnOTkG_8sPx1zWe5l_jbepM
 Content-Type: application/json
 
 {
   "name": "Heart Check",
   "description": "Heart examination",
-  "default_duration_minutes": 30
+  "default_duration_minutes": 30,
+  "base_price": 300,
+  "status": "active"
 }
 
 ###
 
 ### Get Services
 GET http://localhost:8080/api/services
-Authorization: Bearer "YOUR_ACCESS_TOKEN"
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NzU0ODk4NDAsInVzZXJfaWQiOiI1MDFmOGFiYS00MjA0LTQyYjktOWQ2My1iNGNmMTZjYWFkOWYifQ.SG55Bj5dm1YO1RaWR-AoJnOTkG_8sPx1zWe5l_jbepM
 
 ################################
 ### DOCTOR SERVICE MAPPING
@@ -107,13 +117,13 @@ Authorization: Bearer "YOUR_ACCESS_TOKEN"
 
 ### Assign Service To Doctor
 POST http://localhost:8080/api/doctor-services
-Authorization: Bearer "YOUR_ACCESS_TOKEN"
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NzU0ODk4NDAsInVzZXJfaWQiOiI1MDFmOGFiYS00MjA0LTQyYjktOWQ2My1iNGNmMTZjYWFkOWYifQ.SG55Bj5dm1YO1RaWR-AoJnOTkG_8sPx1zWe5l_jbepM
 Content-Type: application/json
 
 {
-  "doctor_id": "DOCTOR_UUID",
-  "service_id": "SERVICE_UUID",
-  "clinic_id": "CLINIC_UUID"
+  "doctor_id": "3c056dfb-da60-412d-a819-912ab58c2e21",
+  "service_id": "c989ce6b-db75-4124-b52a-efa8b23742cc",
+  "clinic_id": "6875b3cc-363e-47ad-9769-ca9d78776cc7"
 }
 
 ################################
@@ -229,7 +239,8 @@ Content-Type: application/json
 
 ###
 GET http://localhost:8080/api/activities
-Authorization: Bearer ACCESS_TOKEN
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NzU0OTE5MDYsInVzZXJfaWQiOiJiZGFlOWIwZC0zNTQ0LTQ5ZTAtYTIyYy04YTgzYmQyYWNjM2IifQ.-StIu1s00MTJ5Ms4Ef36CiTtETTQWV57FpJy_iTR2Mo
+
 
 ### Appointment state machine
 PATCH http://localhost:8080/api/appointments/{id}/status

@@ -17,24 +17,34 @@ type Clinic struct {
 
 func CreateClinic(c *gin.Context) {
 
-	var clinic Clinic
+	var clinic struct {
+		Code          string `json:"code"`
+		Name          string `json:"name"`
+		Status        string `json:"status"`
+		EffectiveFrom string `json:"effective_from"`
+		EffectiveTo   string `json:"effective_to"`
+	}
 
 	if err := c.ShouldBindJSON(&clinic); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
+	userID := c.GetString("userID") // 👈 lấy từ middleware
+
 	query := `
-	INSERT INTO clinics (name,address,phone,status)
-	VALUES ($1,$2,$3,$4)
+	INSERT INTO clinics (code, name, status, effective_from, effective_to, owner_user_id)
+	VALUES ($1, $2, $3, $4, $5, $6)
 	`
 
 	_, err := config.DB.Exec(
 		query,
+		clinic.Code,
 		clinic.Name,
-		clinic.Address,
-		clinic.Phone,
 		clinic.Status,
+		clinic.EffectiveFrom,
+		clinic.EffectiveTo,
+		userID,
 	)
 
 	if err != nil {

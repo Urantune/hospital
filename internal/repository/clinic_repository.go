@@ -9,7 +9,7 @@ func CreateClinic(clinic *models.Clinic) error {
 	query := `
 	INSERT INTO clinics
 	(id, code, name, owner_user_id, status, effective_from, effective_to, created_at, updated_at)
-	VALUES (@p1, @p2, @p3, @p4, @p5, @p6, @p7, GETDATE(), GETDATE())
+	VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW())
 	`
 
 	_, err := config.DB.Exec(
